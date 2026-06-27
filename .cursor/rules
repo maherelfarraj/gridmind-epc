@@ -1,0 +1,15 @@
+You are working on GridMind EPC™, a luxury enterprise utility-scale solar design and SCADA platform.
+
+Architecture:
+- web/ is the Next.js 14 app for Vercel.
+- supabase/schema.sql is the database source of truth.
+- Python Streamlit/FastAPI legacy files remain for local Docker demos.
+- New production development should prioritize Next.js, Supabase, and Vercel.
+
+Coding rules:
+- Keep engineering formulas deterministic and unit-tested.
+- Do not hardcode secrets. Use environment variables only.
+- Use Supabase Row Level Security for user-owned and authenticated data.
+- Keep UI premium, clean, technical, and suitable for enterprise EPC clients.
+- Every new calculation must include units in names and labels.
+- Preserve GridMind EPC™ branding: navy #002B49, orange #FF8C00, mist #F4F6F8.
