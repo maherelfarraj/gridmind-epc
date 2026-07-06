@@ -104,6 +104,17 @@ done
 
 echo "==> Configuration complete."
 
+echo "==> Triggering production redeploy"
+deploy_raw="$(api POST "/v13/deployments" "{\"name\":\"${PROJECT}\",\"target\":\"production\",\"gitSource\":{\"type\":\"github\",\"org\":\"maherelfarraj\",\"repo\":\"gridmind-epc\",\"ref\":\"main\"}}")"
+deploy_body="${deploy_raw%$'\n'*}"
+deploy_status="${deploy_raw##*$'\n'}"
+if [[ "$deploy_status" == "200" ]]; then
+  python3 -c 'import json,sys; d=json.loads(sys.argv[1]); print("  deployment:", d.get("url") or d.get("id"))' "$deploy_body"
+else
+  echo "  note: redeploy returned ${deploy_status}: ${deploy_body}"
+  echo "  Vercel may auto-deploy from GitHub on the next push."
+fi
+
 cat <<EOF
 
 Verify:
