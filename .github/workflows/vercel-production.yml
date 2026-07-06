@@ -1,0 +1,46 @@
+name: Vercel Production Setup
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+concurrency:
+  group: vercel-production
+  cancel-in-progress: true
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Vercel (Root Directory, domains, rename)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT: gridmind-epc
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          RENAME_PROJECT: gridmindepc
+          VERCEL_DOMAINS: pvmind.ai,www.pvmind.ai
+        run: |
+          if [[ -z "${VERCEL_TOKEN:-}" ]]; then
+            echo "VERCEL_TOKEN not set. Add it in GitHub repo secrets, then re-run this workflow."
+            echo "Manual steps: Vercel -> gridmind-epc -> Root Directory=web, Domains=pvmind.ai"
+            exit 0
+          fi
+          chmod +x scripts/configure-vercel-project.sh
+          ./scripts/configure-vercel-project.sh
+
+  web-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
