@@ -9,7 +9,7 @@ set -euo pipefail
 # Usage:
 #   VERCEL_TOKEN=xxx ./scripts/configure-vercel-project.sh
 
-API="https://api.vercel.com"
+API="${VERCEL_API:-https://api.vercel.com}"
 PROJECT="${VERCEL_PROJECT:-gridmind-epc}"
 ROOT_DIRECTORY="${VERCEL_ROOT_DIRECTORY:-web}"
 RENAME_PROJECT="${RENAME_PROJECT:-gridmindepc}"
@@ -43,14 +43,33 @@ api() {
   fi
 }
 
+api_with_status() {
+  local method="$1"
+  local path="$2"
+  local body="${3:-}"
+  local url="${API}${path}$(team_query)"
+
+  if [[ -n "$body" ]]; then
+    curl -sS -X "$method" "$url" \
+      -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "$body" \
+      -w $'\n%{http_code}'
+  else
+    curl -sS -X "$method" "$url" \
+      -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+      -w $'\n%{http_code}'
+  fi
+}
+
 print_project() {
   python3 -c 'import json,sys; p=json.load(sys.stdin); print("  rootDirectory:", p.get("rootDirectory")); print("  name:", p.get("name"))'
 }
 
 print_domain() {
   python3 -c 'import json,sys; d=json.load(sys.stdin); print("  verified:", d.get("verified"));
-v=d.get("verification") or []
-[print(f"  DNS {x.get(\"type\")} {x.get(\"domain\")} -> {x.get(\"value\")}") for x in v]'
+for x in d.get("verification") or []:
+    print("  DNS {} {} -> {}".format(x.get("type"), x.get("domain"), x.get("value")))'
 }
 
 echo "==> Configuring Vercel project: ${PROJECT}"
@@ -60,8 +79,24 @@ api PATCH "/v9/projects/${PROJECT}" "{\"rootDirectory\":\"${ROOT_DIRECTORY}\"}" 
 
 if [[ -n "$RENAME_PROJECT" && "$RENAME_PROJECT" != "$PROJECT" ]]; then
   echo "==> Renaming project to '${RENAME_PROJECT}'"
-  api PATCH "/v9/projects/${PROJECT}" "{\"name\":\"${RENAME_PROJECT}\"}" | print_project
-  PROJECT="$RENAME_PROJECT"
+  rename_response="$(api_with_status PATCH "/v9/projects/${PROJECT}" "{\"name\":\"${RENAME_PROJECT}\"}")"
+  rename_status="${rename_response##*$'\n'}"
+  rename_body="${rename_response%$'\n'*}"
+
+  case "$rename_status" in
+    200)
+      echo "$rename_body" | print_project
+      PROJECT="$RENAME_PROJECT"
+      ;;
+    409)
+      echo "  note: rename skipped because project name '${RENAME_PROJECT}' is already in use"
+      ;;
+    *)
+      echo "ERROR: Failed to rename project to '${RENAME_PROJECT}' (HTTP ${rename_status})" >&2
+      [[ -n "$rename_body" ]] && echo "$rename_body" >&2
+      exit 1
+      ;;
+  esac
 fi
 
 for domain in "${DOMAINS[@]}"; do
