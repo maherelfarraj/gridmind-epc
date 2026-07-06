@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-gridmindepc.com}"
+DOMAIN="${DOMAIN:-pvmind.ai}"
 EMAIL="${EMAIL:-engineering@gsiuae.com}"
 
 echo "Starting GridMind EPC deployment for $DOMAIN"

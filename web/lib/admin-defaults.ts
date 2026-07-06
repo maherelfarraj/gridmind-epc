@@ -94,7 +94,7 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
     contingencyPct: 5
   },
   users: [
-    { id: "u-1", name: "Admin User", email: "admin@gridmindepc.com", role: "Admin" },
-    { id: "u-2", name: "Engineer User", email: "engineer@gridmindepc.com", role: "Engineer" }
+    { id: "u-1", name: "Admin User", email: "admin@pvmind.ai", role: "Admin" },
+    { id: "u-2", name: "Engineer User", email: "engineer@pvmind.ai", role: "Engineer" }
   ]
 };

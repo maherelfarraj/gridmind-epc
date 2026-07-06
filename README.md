@@ -78,14 +78,14 @@ This updated package includes:
 
 - `proposal_generator.py` for branded GridMind EPC™ engineering bid PDFs.
 - A dashboard PDF download button after the design calculation finishes.
-- `nginx.conf` for routing the dashboard and API through `gridmindepc.com`.
+- `nginx.conf` for routing the dashboard and API through `pvmind.ai`.
 - `deploy_gridmind_server.sh` for Docker restart, Nginx setup, and Let's Encrypt SSL.
 - `DEPLOYMENT_DOMAIN.md` with DNS and server launch steps.
 
 Recommended production URL:
 
 ```text
-https://gridmindepc.com
+https://pvmind.ai
 ```
 
 

@@ -4,7 +4,7 @@ set -euo pipefail
 # Configure GridMind EPC on Vercel:
 # - Root Directory -> web
 # - Domains -> pvmind.ai, www.pvmind.ai
-# - Optional project rename -> gridmindepc (fixes gridmindepc.vercel.app)
+# - Optional project rename -> pvmind (fixes pvmind.vercel.app)
 #
 # Usage:
 #   VERCEL_TOKEN=xxx ./scripts/configure-vercel-project.sh
@@ -12,7 +12,7 @@ set -euo pipefail
 API="https://api.vercel.com"
 PROJECT="${VERCEL_PROJECT:-gridmind-epc}"
 ROOT_DIRECTORY="${VERCEL_ROOT_DIRECTORY:-web}"
-RENAME_PROJECT="${RENAME_PROJECT:-gridmindepc}"
+RENAME_PROJECT="${RENAME_PROJECT:-pvmind}"
 IFS=',' read -r -a DOMAINS <<< "${VERCEL_DOMAINS:-pvmind.ai,www.pvmind.ai}"
 
 if [[ -z "${VERCEL_TOKEN:-}" ]]; then

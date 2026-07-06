@@ -85,14 +85,14 @@ npm run dev
 Use:
 
 ```text
-https://gridmindepc.com
+https://pvmind.ai
 ```
 
 In Vercel, add both:
 
 ```text
-gridmindepc.com
-www.gridmindepc.com
+pvmind.ai
+www.pvmind.ai
 ```
 
 Then configure DNS using the records Vercel displays.
