@@ -10,7 +10,7 @@ set -euo pipefail
 #   VERCEL_TOKEN=xxx ./scripts/configure-vercel-project.sh
 
 API="https://api.vercel.com"
-PROJECT="${VERCEL_PROJECT:-gridmind-epc}"
+PROJECT="${VERCEL_PROJECT:-gridmindepc}"
 ROOT_DIRECTORY="${VERCEL_ROOT_DIRECTORY:-web}"
 RENAME_PROJECT="${RENAME_PROJECT:-gridmindepc}"
 IFS=',' read -r -a DOMAINS <<< "${VERCEL_DOMAINS:-pvmind.ai,www.pvmind.ai}"
@@ -65,7 +65,13 @@ PY
 echo "==> Configuring Vercel project: ${PROJECT}"
 
 echo "==> Setting Root Directory to '${ROOT_DIRECTORY}'"
-api PATCH "/v9/projects/${PROJECT}" "{\"rootDirectory\":\"${ROOT_DIRECTORY}\"}" | print_project
+root_response="$(api PATCH "/v9/projects/${PROJECT}" "{\"rootDirectory\":\"${ROOT_DIRECTORY}\"}")"
+if echo "$root_response" | python3 -c 'import json,sys; json.load(sys.stdin)' 2>/dev/null; then
+  echo "$root_response" | print_project
+else
+  echo "ERROR: could not update project '${PROJECT}': ${root_response}" >&2
+  exit 1
+fi
 
 if [[ -n "$RENAME_PROJECT" && "$RENAME_PROJECT" != "$PROJECT" ]]; then
   echo "==> Renaming project to '${RENAME_PROJECT}'"
