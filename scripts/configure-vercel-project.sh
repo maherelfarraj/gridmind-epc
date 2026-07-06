@@ -4,7 +4,7 @@ set -euo pipefail
 # Configure GridMind EPC on Vercel:
 # - Root Directory -> web
 # - Domains -> pvmind.ai, www.pvmind.ai
-# - Optional project rename -> gridmindepc (fixes gridmindepc.vercel.app)
+# - Optional project rename -> gridmindepc (skipped if name is taken)
 #
 # Usage:
 #   VERCEL_TOKEN=xxx ./scripts/configure-vercel-project.sh
@@ -33,12 +33,12 @@ api() {
   local url="${API}${path}$(team_query)"
 
   if [[ -n "$body" ]]; then
-    curl -fsS -X "$method" "$url" \
+    curl -sS -X "$method" "$url" \
       -H "Authorization: Bearer ${VERCEL_TOKEN}" \
       -H "Content-Type: application/json" \
       -d "$body"
   else
-    curl -fsS -X "$method" "$url" \
+    curl -sS -X "$method" "$url" \
       -H "Authorization: Bearer ${VERCEL_TOKEN}"
   fi
 }
@@ -60,18 +60,25 @@ api PATCH "/v9/projects/${PROJECT}" "{\"rootDirectory\":\"${ROOT_DIRECTORY}\"}" 
 
 if [[ -n "$RENAME_PROJECT" && "$RENAME_PROJECT" != "$PROJECT" ]]; then
   echo "==> Renaming project to '${RENAME_PROJECT}'"
-  api PATCH "/v9/projects/${PROJECT}" "{\"name\":\"${RENAME_PROJECT}\"}" | print_project
-  PROJECT="$RENAME_PROJECT"
+  rename_response="$(api PATCH "/v9/projects/${PROJECT}" "{\"name\":\"${RENAME_PROJECT}\"}")"
+  if echo "$rename_response" | python3 -c 'import json,sys; json.load(sys.stdin)' 2>/dev/null; then
+    echo "$rename_response" | print_project
+    PROJECT="$RENAME_PROJECT"
+  else
+    echo "  note: rename skipped (${rename_response}). Another project may already use '${RENAME_PROJECT}'."
+    echo "  Delete the empty gridmindepc project in Vercel dashboard to fix gridmindepc.vercel.app."
+  fi
 fi
 
 for domain in "${DOMAINS[@]}"; do
   domain="$(echo "$domain" | xargs)"
   [[ -z "$domain" ]] && continue
   echo "==> Adding domain: ${domain}"
-  if response="$(api POST "/v10/projects/${PROJECT}/domains" "{\"name\":\"${domain}\"}" 2>&1)"; then
-    echo "$response" | print_domain
+  domain_response="$(api POST "/v10/projects/${PROJECT}/domains" "{\"name\":\"${domain}\"}")"
+  if echo "$domain_response" | python3 -c 'import json,sys; json.load(sys.stdin)' 2>/dev/null; then
+    echo "$domain_response" | print_domain
   else
-    echo "  note: ${domain} may already exist on this project"
+    echo "  note: ${domain} may already exist on this project (${domain_response})"
   fi
 done
 
