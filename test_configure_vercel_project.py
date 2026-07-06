@@ -44,7 +44,7 @@ def _make_vercel_stub_handler(calls):
                 return
             self._write_json(500, {"error": {"message": "unexpected POST"}})
 
-        def log_message(self, msg_format, *args):
+        def log_message(self, _msg_format, *_args):
             return
 
     return _VercelStubHandler

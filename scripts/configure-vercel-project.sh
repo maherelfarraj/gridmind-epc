@@ -67,9 +67,7 @@ print_project() {
 }
 
 print_domain() {
-  python3 -c 'import json,sys; d=json.load(sys.stdin); print("  verified:", d.get("verified"));
-for x in d.get("verification") or []:
-    print("  DNS {} {} -> {}".format(x.get("type"), x.get("domain"), x.get("value")))'
+  python3 -c 'import json,sys; d=json.load(sys.stdin); print("  verified:", d.get("verified")); [print("  DNS {} {} -> {}".format(x.get("type"), x.get("domain"), x.get("value"))) for x in (d.get("verification") or [])]'
 }
 
 echo "==> Configuring Vercel project: ${PROJECT}"
