@@ -12,6 +12,7 @@ concurrency:
 jobs:
   configure:
     runs-on: ubuntu-latest
+    environment: Production
     steps:
       - uses: actions/checkout@v4
 
@@ -40,6 +41,19 @@ jobs:
         run: |
           if [[ -z "${VERCEL_TOKEN:-}" ]]; then
             exit 0
+          fi
+          missing=0
+          for key in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY; do
+            if [[ -z "${!key:-}" ]]; then
+              echo "MISSING secret: ${key}"
+              missing=1
+            else
+              echo "OK secret present: ${key}"
+            fi
+          done
+          if [[ "$missing" -eq 1 ]]; then
+            echo "Add repository or Production environment secrets with exact names above."
+            exit 1
           fi
           chmod +x scripts/configure-vercel-env.sh
           ./scripts/configure-vercel-env.sh
