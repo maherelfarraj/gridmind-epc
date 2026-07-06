@@ -1,9 +1,9 @@
-# GridMind EPC™ Domain Setup — gridmindepc.com
+# GridMind EPC™ Domain Setup — pvmind.ai
 
 ## Final production URL
 
 ```text
-https://gridmindepc.com
+https://pvmind.ai
 ```
 
 ## Recommended Vercel setup
@@ -22,15 +22,15 @@ web
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=https://gridmindepc.com
+NEXT_PUBLIC_APP_URL=https://pvmind.ai
 ```
 
 5. In Vercel, open **Project → Settings → Domains**.
 6. Add:
 
 ```text
-gridmindepc.com
-www.gridmindepc.com
+pvmind.ai
+www.pvmind.ai
 ```
 
 ## DNS records
@@ -46,8 +46,8 @@ Use the exact values Vercel shows in the domain setup screen.
 
 ## Final test checklist
 
-- `https://gridmindepc.com` opens the landing page.
-- `https://gridmindepc.com/dashboard` opens the GridMind EPC™ dashboard.
+- `https://pvmind.ai` opens the landing page.
+- `https://pvmind.ai/dashboard` opens the GridMind EPC™ dashboard.
 - Calculation cards update instantly.
 - “Calculate + Save to Supabase” saves a record in `design_runs`.
 - “Download Branded PDF Proposal” downloads the proposal PDF.

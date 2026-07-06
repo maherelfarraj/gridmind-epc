@@ -72,7 +72,7 @@ Use `LOVABLE_PROMPT.md` to generate or polish UI screens, then export code and m
 
 ## Step 8 — Production domain
 In Vercel:
-- Add domain `gridmindepc.com`
+- Add domain `pvmind.ai`
 - Copy Vercel DNS target
 - Add CNAME in DNS:
   - Host: gridmind

@@ -20,7 +20,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT: gridmind-epc
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-          RENAME_PROJECT: gridmindepc
+          RENAME_PROJECT: pvmind
           VERCEL_DOMAINS: pvmind.ai,www.pvmind.ai
         run: |
           if [[ -z "${VERCEL_TOKEN:-}" ]]; then

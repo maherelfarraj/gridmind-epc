@@ -5,7 +5,7 @@
 Use this production subdomain:
 
 ```text
-https://gridmindepc.com
+https://pvmind.ai
 ```
 
 ## DNS Record
@@ -24,16 +24,16 @@ SSH into the server, upload this project folder, then run:
 cp .env.example .env
 nano .env
 chmod +x deploy_gridmind_server.sh
-DOMAIN=gridmindepc.com EMAIL=engineering@gsiuae.com ./deploy_gridmind_server.sh
+DOMAIN=pvmind.ai EMAIL=engineering@gsiuae.com ./deploy_gridmind_server.sh
 ```
 
 ## Nginx Routing
 
 `nginx.conf` routes:
 
-- `https://gridmindepc.com` → Streamlit dashboard on port `8501`
-- `https://gridmindepc.com/api/v1/` → FastAPI backend on port `8000`
-- `https://gridmindepc.com/health` → API health check
+- `https://pvmind.ai` → Streamlit dashboard on port `8501`
+- `https://pvmind.ai/api/v1/` → FastAPI backend on port `8000`
+- `https://pvmind.ai/health` → API health check
 
 ## Final Restart
 

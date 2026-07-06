@@ -1,4 +1,4 @@
-from app import calculate_mv_cable_requirements, generate_bom_and_pricing, size_high_voltage_transformer
+from calculations import calculate_mv_cable_requirements, generate_bom_and_pricing, size_high_voltage_transformer
 
 
 def test_medium_voltage_cable_sizing_bounds():

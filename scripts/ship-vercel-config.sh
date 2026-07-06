@@ -40,7 +40,7 @@ gh run list -R "$REPO" --workflow "$WORKFLOW" --limit 1
 cat <<'EOF'
 
 Next:
-- Open Vercel -> gridmindepc -> Deployments and confirm production redeploy
+- Open Vercel -> pvmind -> Deployments and confirm production redeploy
 - Update pvmind.ai DNS at GoDaddy:
     A     @    76.76.21.21
     CNAME www  cname.vercel-dns.com
