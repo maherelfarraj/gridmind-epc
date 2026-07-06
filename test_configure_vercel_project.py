@@ -80,7 +80,7 @@ def test_configure_script_skips_conflicting_rename_and_keeps_configuring_domains
         thread.join()
         server.server_close()
 
-    assert result.returncode == 0, result.stderr + result.stdout
+    assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
     assert "rename skipped because project name 'gridmindepc' is already in use" in result.stdout
     assert ("PATCH", "/v9/projects/gridmind-epc", '{"rootDirectory":"web"}') in calls
     assert ("PATCH", "/v9/projects/gridmind-epc", '{"name":"gridmindepc"}') in calls
