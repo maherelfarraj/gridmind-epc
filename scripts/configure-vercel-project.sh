@@ -44,13 +44,22 @@ api() {
 }
 
 print_project() {
-  python3 -c 'import json,sys; p=json.load(sys.stdin); print("  rootDirectory:", p.get("rootDirectory")); print("  name:", p.get("name"))'
+  python3 - <<'PY'
+import json, sys
+p = json.load(sys.stdin)
+print("  rootDirectory:", p.get("rootDirectory"))
+print("  name:", p.get("name"))
+PY
 }
 
 print_domain() {
-  python3 -c 'import json,sys; d=json.load(sys.stdin); print("  verified:", d.get("verified"));
-v=d.get("verification") or []
-[print(f"  DNS {x.get(\"type\")} {x.get(\"domain\")} -> {x.get(\"value\")}") for x in v]'
+  python3 - <<'PY'
+import json, sys
+d = json.load(sys.stdin)
+print("  verified:", d.get("verified"))
+for v in d.get("verification") or []:
+    print(f"  DNS {v.get('type')} {v.get('domain')} -> {v.get('value')}")
+PY
 }
 
 echo "==> Configuring Vercel project: ${PROJECT}"
