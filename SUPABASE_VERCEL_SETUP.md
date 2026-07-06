@@ -31,6 +31,23 @@ Run once in Supabase SQL Editor:
 supabase/schema.sql
 ```
 
+## Troubleshooting “secrets added” but workflow still fails
+
+GitHub Actions needs **exact** secret names at **repository** secrets (or Production environment):
+
+| Required name | Common mistake |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `SUPABASE_URL` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `SUPABASE_ANON_KEY` |
+| `SUPABASE_SERVICE_ROLE_KEY` | `SUPABASE_KEY` |
+
+Check: https://github.com/maherelfarraj/gridmind-epc/settings/secrets/actions
+
+Or **Production** environment secrets:  
+https://github.com/maherelfarraj/gridmind-epc/settings/environments/Production
+
+If you added vars only in **Vercel** (not GitHub), open Vercel → gridmindepc → Settings → Environment Variables and add the same three keys there, then redeploy.
+
 ## Verify
 
 ```bash
