@@ -16,6 +16,7 @@ import {
   Line
 } from "recharts";
 import { useApp } from "@/context/app-context";
+import { loadSampleProjects } from "@/lib/sample-projects";
 import { runProjectCalculations } from "@/lib/calculations";
 import { validateExportReady } from "@/lib/validation";
 import { KpiCard, PageHeader, Card } from "@/components/ui-parts";
@@ -24,7 +25,12 @@ import { formatCurrency, formatNumber, formatRatio } from "@/lib/format";
 const CHART_COLORS = ["#2563eb", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4"];
 
 export default function DashboardPage() {
-  const { projects, admin } = useApp();
+  const { projects, admin, refresh } = useApp();
+
+  const handleLoadSamples = () => {
+    loadSampleProjects();
+    refresh();
+  };
 
   let totalPvDc = 0;
   let totalPvAc = 0;
@@ -108,10 +114,19 @@ export default function DashboardPage() {
         <Card>
           <div className="py-12 text-center">
             <p className="text-lg font-semibold text-slate-700">No projects yet</p>
-            <p className="mt-2 text-sm text-slate-500">Create your first PV or PV+BESS project to see portfolio metrics.</p>
-            <Link href="/projects/new" className="mt-4 inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
-              Create New Project
-            </Link>
+            <p className="mt-2 text-sm text-slate-500">Create your first PV or PV+BESS project, or load sample projects to explore the cockpit.</p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/projects/new" className="inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+                Create New Project
+              </Link>
+              <button
+                type="button"
+                onClick={handleLoadSamples}
+                className="inline-block rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Load Sample Projects
+              </button>
+            </div>
           </div>
         </Card>
       ) : (
