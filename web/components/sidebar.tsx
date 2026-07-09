@@ -18,6 +18,7 @@ import {
   Network,
   ClipboardList,
   Rocket,
+  Activity,
   ChevronDown,
   LogOut
 } from "lucide-react";
@@ -38,6 +39,7 @@ const projectNav = [
   { href: "bess-configurator", label: "BESS Configurator", icon: Battery },
   { href: "stringing", label: "Stringing", icon: Cable },
   { href: "yield", label: "Yield Estimate", icon: BarChart3 },
+  { href: "simulation", label: "8760 Simulation", icon: Activity },
   { href: "capex", label: "CAPEX Estimate", icon: DollarSign },
   { href: "bom", label: "BOM / BOQ", icon: Package },
   { href: "sld", label: "SLD Preview", icon: Network },
