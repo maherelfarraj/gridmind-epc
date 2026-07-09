@@ -17,6 +17,7 @@ import {
   Package,
   Network,
   ClipboardList,
+  Rocket,
   ChevronDown
 } from "lucide-react";
 import { useApp } from "@/context/app-context";
@@ -25,7 +26,8 @@ import { useState } from "react";
 const mainNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: FolderKanban },
-  { href: "/projects/new", label: "New Project", icon: PlusCircle }
+  { href: "/projects/new", label: "New Project", icon: PlusCircle },
+  { href: "/rollouts", label: "Rollouts", icon: Rocket }
 ];
 
 const projectNav = [
