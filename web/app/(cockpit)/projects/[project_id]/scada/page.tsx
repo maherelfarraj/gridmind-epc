@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useProjectPage, ProjectNotFound } from "@/hooks/use-project-page";
 import { PageHeader, Card } from "@/components/ui-parts";
 import { ScadaImport } from "@/components/scada-import";
+import { ScadaPerformance } from "@/components/scada-performance";
 import { useApp } from "@/context/app-context";
 import { useToast } from "@/components/toast-provider";
 import { formatNumber } from "@/lib/format";
@@ -117,6 +118,12 @@ export default function ScadaPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
+          {rows.length > 0 && (
+            <Card title="Measured vs Modeled Performance">
+              <ScadaPerformance project={project} rows={rows} />
+            </Card>
+          )}
+
           {rows.length > 0 && (
             <Card title="AC Power & Irradiance">
               <ResponsiveContainer width="100%" height={260}>

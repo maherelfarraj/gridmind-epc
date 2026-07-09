@@ -15,6 +15,7 @@ import {
   type DesignSummary,
 } from "@/app/actions/design-history";
 import { History, Save, RotateCcw, Trash2, Clock, User } from "lucide-react";
+import { DesignComparison, type ComparisonOption } from "@/components/design-comparison";
 
 export default function DesignHistoryPage() {
   const { project, calcs, save } = useProjectPage();
@@ -58,6 +59,15 @@ export default function DesignHistoryPage() {
     totalCapex: calcs.capex.totalCapex ?? 0,
     currency,
   };
+
+  const comparisonOptions: ComparisonOption[] = [
+    { id: "current", label: "Current Design (live)", summary: currentSummary },
+    ...entries.map((e) => ({
+      id: e.id,
+      label: `${e.label} · ${new Date(e.createdAt).toLocaleDateString()}`,
+      summary: e.summary,
+    })),
+  ];
 
   const handleSave = async () => {
     if (!canSave || saving) return;
@@ -124,6 +134,10 @@ export default function DesignHistoryPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
+          <Card title="Compare Designs">
+            <DesignComparison options={comparisonOptions} />
+          </Card>
+
           <Card title="Version History">
             {loading ? (
               <p className="py-8 text-center text-sm text-slate-500">Loading history...</p>
