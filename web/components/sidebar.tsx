@@ -18,10 +18,13 @@ import {
   Network,
   ClipboardList,
   Rocket,
-  ChevronDown
+  ChevronDown,
+  LogOut
 } from "lucide-react";
 import { useApp } from "@/context/app-context";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const mainNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -41,12 +44,19 @@ const projectNav = [
   { href: "reports", label: "Reports", icon: FileText }
 ];
 
-export function Sidebar() {
+export function Sidebar({ user }: { user: { name: string; email: string } }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { activeProject, projects, setActive } = useApp();
   const [showProjectSelect, setShowProjectSelect] = useState(false);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    router.push("/sign-in");
+    router.refresh();
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-slate-900 text-white">
@@ -150,8 +160,23 @@ export function Sidebar() {
         </Link>
       </nav>
 
-      <div className="border-t border-slate-700 px-5 py-3">
-        <p className="text-[10px] text-slate-500">GridMind EPC</p>
+      <div className="border-t border-slate-700 px-4 py-3">
+        <div className="mb-2 flex items-center gap-3 px-1">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white">
+            {user.name.charAt(0).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-white">{user.name}</p>
+            <p className="truncate text-[11px] text-slate-400">{user.email}</p>
+          </div>
+        </div>
+        <button
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-slate-800"
+        >
+          <LogOut className="h-4 w-4" />
+          Sign out
+        </button>
       </div>
     </aside>
   );

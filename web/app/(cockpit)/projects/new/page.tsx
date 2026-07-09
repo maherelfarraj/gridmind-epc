@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createProject, createNewProjectData } from "@/lib/storage";
+import { createNewProjectData } from "@/lib/project-factory";
 import { PageHeader, Card } from "@/components/ui-parts";
 import type { Project } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -34,9 +34,10 @@ const inputCls = "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm fo
 
 export default function NewProjectPage() {
   const router = useRouter();
-  const { refresh, setActive } = useApp();
+  const { admin, createProject } = useApp();
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<Omit<Project, "id" | "createdAt" | "updatedAt">>(createNewProjectData());
+  const [creating, setCreating] = useState(false);
+  const [data, setData] = useState<Omit<Project, "id" | "createdAt" | "updatedAt">>(() => createNewProjectData(admin));
 
   const update = <K extends keyof typeof data>(section: K, field: string, value: unknown) => {
     setData((prev) => ({
@@ -50,11 +51,15 @@ export default function NewProjectPage() {
       ? (data.capacity.pvDcCapacityMwp / data.capacity.pvAcCapacityMwac).toFixed(2)
       : "Needs Input";
 
-  const handleCreate = () => {
-    const project = createProject(data);
-    refresh();
-    setActive(project.id);
-    router.push(`/projects/${project.id}`);
+  const handleCreate = async () => {
+    if (creating) return;
+    setCreating(true);
+    try {
+      const project = await createProject(data);
+      router.push(`/projects/${project.id}`);
+    } catch {
+      setCreating(false);
+    }
   };
 
   const renderStep = () => {
@@ -330,9 +335,9 @@ export default function NewProjectPage() {
               Next <ChevronRight className="h-4 w-4" />
             </button>
           ) : (
-            <button onClick={handleCreate} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white">
-              <Check className="h-4 w-4" /> Create Project
-            </button>
+              <button onClick={handleCreate} disabled={creating} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+                <Check className="h-4 w-4" /> {creating ? "Creating..." : "Create Project"}
+              </button>
           )}
         </div>
       </Card>
