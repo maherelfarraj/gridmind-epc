@@ -5,6 +5,7 @@ import { useProjectPage, ProjectNotFound } from "@/hooks/use-project-page";
 import { PageHeader, Card, ValidationBanner } from "@/components/ui-parts";
 import { formatInteger, formatNumber } from "@/lib/format";
 import { useToast } from "@/components/toast-provider";
+import { downloadSldReport } from "@/lib/export";
 import { Download, X } from "lucide-react";
 
 function SldNode({ label, sublabel, color }: { label: string; sublabel?: string; color: string }) {
@@ -29,7 +30,7 @@ export default function SldPage() {
 
   const handleExport = () => {
     setDrawerOpen(true);
-    showToast("SLD preview opened — PDF export placeholder", "info");
+    showToast("SLD preview opened", "info");
   };
 
   const labels = {
@@ -109,10 +110,14 @@ export default function SldPage() {
               <p>Export Limit: {labels.exportLimit}</p>
             </div>
             <button
-              onClick={() => showToast("PDF download placeholder — export will be available in production", "info")}
-              className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white"
+              onClick={() => {
+                const opened = downloadSldReport(project, calcs);
+                if (opened === false) showToast("Enable pop-ups to download the SLD report", "warning");
+                else showToast("SLD report generated — use Print / Save as PDF", "success");
+              }}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
             >
-              Download Placeholder
+              <Download className="h-4 w-4" /> Download PDF Report
             </button>
           </div>
         </div>

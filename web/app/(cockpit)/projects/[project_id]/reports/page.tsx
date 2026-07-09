@@ -3,6 +3,7 @@
 import { useProjectPage, ProjectNotFound } from "@/hooks/use-project-page";
 import { PageHeader, Card, ValidationBanner } from "@/components/ui-parts";
 import { useToast } from "@/components/toast-provider";
+import { downloadReport } from "@/lib/export";
 import type { ReportRecord, ReportStatus } from "@/lib/types";
 import { FileText, Download, Save } from "lucide-react";
 
@@ -48,8 +49,13 @@ export default function ReportsPage() {
       showToast("Export locked — complete required inputs", "warning");
       return;
     }
+    const opened = downloadReport(type, project, calcs);
+    if (opened === false) {
+      showToast("Enable pop-ups to download the report", "warning");
+      return;
+    }
     updateReport(type, "Exported");
-    showToast(`${type} download placeholder triggered`, "info");
+    showToast(`${type} generated — use Print / Save as PDF`, "success");
   };
 
   const handleSave = (type: string) => {

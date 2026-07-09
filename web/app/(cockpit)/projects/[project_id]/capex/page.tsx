@@ -3,6 +3,8 @@
 import { useProjectPage, ProjectNotFound } from "@/hooks/use-project-page";
 import { PageHeader, Card, CalcPanel, MetricRow, ValidationBanner } from "@/components/ui-parts";
 import { formatCurrency, formatNumber } from "@/lib/format";
+import { downloadReport } from "@/lib/export";
+import { FileText } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const inputCls = "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm";
@@ -30,6 +32,15 @@ export default function CapexPage() {
     <div>
       <PageHeader title="CAPEX Estimate" description="Capital expenditure breakdown and LCOE" />
       <div className="mb-4"><ValidationBanner type={exportValidation.exportReady ? "ready" : "locked"} message={exportValidation.message} /></div>
+
+      <div className="mb-4 flex justify-end">
+        <button
+          onClick={() => downloadReport("CAPEX Estimate Report", project, calcs)}
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          <FileText className="h-4 w-4" /> Download PDF
+        </button>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
