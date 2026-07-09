@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   BarChart,
@@ -16,20 +17,29 @@ import {
   Line
 } from "recharts";
 import { useApp } from "@/context/app-context";
-import { loadSampleProjects } from "@/lib/sample-projects";
+import { getSampleProjectData } from "@/lib/sample-projects";
 import { runProjectCalculations } from "@/lib/calculations";
 import { validateExportReady } from "@/lib/validation";
 import { KpiCard, PageHeader, Card } from "@/components/ui-parts";
+import { CohortBadge, RolloutGate } from "@/components/rollout-gate";
 import { formatCurrency, formatNumber, formatRatio } from "@/lib/format";
 
 const CHART_COLORS = ["#2563eb", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4"];
 
 export default function DashboardPage() {
-  const { projects, admin, refresh } = useApp();
+  const { projects, admin, createProject } = useApp();
+  const [loadingSamples, setLoadingSamples] = useState(false);
 
-  const handleLoadSamples = () => {
-    loadSampleProjects();
-    refresh();
+  const handleLoadSamples = async () => {
+    if (loadingSamples) return;
+    setLoadingSamples(true);
+    try {
+      for (const data of getSampleProjectData()) {
+        await createProject(data);
+      }
+    } finally {
+      setLoadingSamples(false);
+    }
   };
 
   let totalPvDc = 0;
@@ -105,10 +115,13 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Dashboard"
-        description="Portfolio overview for PV_Mind Cockpit projects"
-      />
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <PageHeader
+          title="Dashboard"
+          description="Portfolio overview for PV_Mind Cockpit projects"
+        />
+        <CohortBadge featureKey="cockpit-charts-v2" />
+      </div>
 
       {projects.length === 0 ? (
         <Card>
@@ -122,9 +135,10 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={handleLoadSamples}
-                className="inline-block rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                disabled={loadingSamples}
+                className="inline-block rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
               >
-                Load Sample Projects
+                {loadingSamples ? "Loading..." : "Load Sample Projects"}
               </button>
             </div>
           </div>
@@ -144,6 +158,19 @@ export default function DashboardPage() {
             <KpiCard title="Export-Ready Projects" value={String(exportReady)} variant="emerald" />
             <KpiCard title="Incomplete Projects" value={String(incomplete)} variant="amber" />
           </div>
+
+          <RolloutGate featureKey="cockpit-charts-v2">
+            <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">Canary</span>
+                <p className="text-sm font-semibold text-blue-900">Cockpit Charts v2 is enabled for you</p>
+              </div>
+              <p className="mt-1 text-sm text-blue-800">
+                You are in the canary cohort for the redesigned visualizations. Manage this rollout in{" "}
+                <Link href="/rollouts" className="font-medium underline">Progressive Rollouts</Link>.
+              </p>
+            </div>
+          </RolloutGate>
 
           <div className="grid gap-6 lg:grid-cols-2">
             <Card title="Projects by Type">

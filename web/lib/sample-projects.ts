@@ -1,9 +1,10 @@
 "use client";
 
 import type { Project } from "./types";
-import { createProject } from "./storage";
 
 type NewProject = Omit<Project, "id" | "createdAt" | "updatedAt">;
+
+export type { NewProject };
 
 const SAMPLE_PROJECTS: NewProject[] = [
   {
@@ -198,6 +199,6 @@ const SAMPLE_PROJECTS: NewProject[] = [
   }
 ];
 
-export function loadSampleProjects(): Project[] {
-  return SAMPLE_PROJECTS.map((data) => createProject(data));
+export function getSampleProjectData(): NewProject[] {
+  return SAMPLE_PROJECTS;
 }

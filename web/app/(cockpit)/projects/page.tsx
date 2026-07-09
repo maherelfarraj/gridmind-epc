@@ -6,11 +6,10 @@ import { runProjectCalculations } from "@/lib/calculations";
 import { validateExportReady } from "@/lib/validation";
 import { PageHeader, Card, DataTable } from "@/components/ui-parts";
 import { formatCurrency, formatNumber } from "@/lib/format";
-import { deleteProject } from "@/lib/storage";
 import { Plus, Trash2 } from "lucide-react";
 
 export default function ProjectsPage() {
-  const { projects, admin, refresh, setActive } = useApp();
+  const { projects, admin, deleteProject, setActive } = useApp();
 
   const rows = projects.map((p) => {
     const calcs = runProjectCalculations(p, admin);
@@ -83,8 +82,7 @@ export default function ProjectsPage() {
                         <button
                           onClick={() => {
                             if (confirm("Delete this project?")) {
-                              deleteProject(id);
-                              refresh();
+                              void deleteProject(id);
                             }
                           }}
                           className="text-red-500 hover:text-red-700"

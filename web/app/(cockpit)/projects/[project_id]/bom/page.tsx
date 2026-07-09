@@ -3,6 +3,8 @@
 import { useProjectPage, ProjectNotFound } from "@/hooks/use-project-page";
 import { PageHeader, Card, ValidationBanner } from "@/components/ui-parts";
 import { formatCurrency, formatInteger } from "@/lib/format";
+import { downloadBomCsv, downloadReport } from "@/lib/export";
+import { Download, FileText } from "lucide-react";
 
 export default function BomPage() {
   const { project, calcs, exportValidation } = useProjectPage();
@@ -25,6 +27,21 @@ export default function BomPage() {
     <div>
       <PageHeader title="BOM / BOQ" description="Auto-generated bill of materials and quantities" />
       <div className="mb-4"><ValidationBanner type={exportValidation.exportReady ? "ready" : "locked"} message={exportValidation.message} /></div>
+
+      <div className="mb-4 flex flex-wrap justify-end gap-2">
+        <button
+          onClick={() => downloadBomCsv(project, calcs)}
+          className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          <Download className="h-4 w-4" /> Download CSV
+        </button>
+        <button
+          onClick={() => downloadReport("BOM / BOQ Report", project, calcs)}
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          <FileText className="h-4 w-4" /> Download PDF
+        </button>
+      </div>
 
       <Card>
         <div className="mb-4 flex items-center justify-between">

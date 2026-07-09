@@ -2,23 +2,28 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { AdminSettings, Project } from "@/lib/types";
+import { DEFAULT_ADMIN_SETTINGS } from "@/lib/admin-defaults";
+import { getActiveProjectId, setActiveProjectId } from "@/lib/storage";
 import {
-  getActiveProjectId,
-  getAdminSettings,
-  getProject,
-  getProjects,
-  saveAdminSettings,
-  saveProject,
-  setActiveProjectId
-} from "@/lib/storage";
+  createProjectAction,
+  deleteProjectAction,
+  getAdminSettingsAction,
+  listProjects,
+  saveAdminSettingsAction,
+  saveProjectAction,
+} from "@/app/actions/projects";
+import type { NewProjectData } from "@/lib/project-factory";
 
 interface AppContextValue {
   projects: Project[];
   activeProject: Project | null;
   admin: AdminSettings;
-  refresh: () => void;
+  loading: boolean;
+  refresh: () => Promise<void>;
   setActive: (id: string | null) => void;
+  createProject: (data: NewProjectData) => Promise<Project>;
   updateProject: (project: Project) => void;
+  deleteProject: (id: string) => Promise<void>;
   updateAdmin: (settings: AdminSettings) => void;
 }
 
@@ -26,52 +31,75 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
-  const [admin, setAdmin] = useState<AdminSettings>(getAdminSettings());
-  const [mounted, setMounted] = useState(false);
+  const [activeProjectId, setActiveProjectIdState] = useState<string | null>(null);
+  const [admin, setAdmin] = useState<AdminSettings>(DEFAULT_ADMIN_SETTINGS);
+  const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(() => {
-    const list = getProjects();
+  const refresh = useCallback(async () => {
+    const [list, savedAdmin] = await Promise.all([listProjects(), getAdminSettingsAction()]);
     setProjects(list);
-    const activeId = getActiveProjectId();
-    if (activeId) {
-      const proj = getProject(activeId);
-      setActiveProject(proj);
-    } else if (list.length > 0) {
-      setActiveProject(list[0]);
-      setActiveProjectId(list[0].id);
-    } else {
-      setActiveProject(null);
-    }
-    setAdmin(getAdminSettings());
+    setAdmin(savedAdmin ? { ...DEFAULT_ADMIN_SETTINGS, ...savedAdmin } : DEFAULT_ADMIN_SETTINGS);
+
+    const storedActive = getActiveProjectId();
+    const resolved = storedActive && list.some((p) => p.id === storedActive)
+      ? storedActive
+      : list[0]?.id ?? null;
+    setActiveProjectIdState(resolved);
+    setActiveProjectId(resolved);
   }, []);
 
   useEffect(() => {
-    refresh();
-    setMounted(true);
+    refresh().finally(() => setLoading(false));
   }, [refresh]);
 
   const setActive = (id: string | null) => {
     setActiveProjectId(id);
-    setActiveProject(id ? getProject(id) : null);
+    setActiveProjectIdState(id);
+  };
+
+  const createProject = async (data: NewProjectData) => {
+    const created = await createProjectAction(data);
+    setProjects((prev) => [created, ...prev]);
+    setActive(created.id);
+    return created;
   };
 
   const updateProject = (project: Project) => {
-    saveProject(project);
-    refresh();
+    // optimistic local update, then persist
+    setProjects((prev) => prev.map((p) => (p.id === project.id ? project : p)));
+    void saveProjectAction(project).then((saved) => {
+      setProjects((prev) => prev.map((p) => (p.id === saved.id ? saved : p)));
+    });
+  };
+
+  const deleteProject = async (id: string) => {
+    await deleteProjectAction(id);
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+    if (activeProjectId === id) setActive(null);
   };
 
   const updateAdmin = (settings: AdminSettings) => {
-    saveAdminSettings(settings);
     setAdmin(settings);
+    void saveAdminSettingsAction(settings);
   };
 
-  if (!mounted) {
-    return <div className="min-h-screen bg-slate-50" />;
-  }
+  const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
   return (
-    <AppContext.Provider value={{ projects, activeProject, admin, refresh, setActive, updateProject, updateAdmin }}>
+    <AppContext.Provider
+      value={{
+        projects,
+        activeProject,
+        admin,
+        loading,
+        refresh,
+        setActive,
+        createProject,
+        updateProject,
+        deleteProject,
+        updateAdmin,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
