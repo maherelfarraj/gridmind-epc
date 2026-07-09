@@ -19,10 +19,13 @@ import {
   ClipboardList,
   Rocket,
   Activity,
+  History,
+  Database,
+  Users,
   ChevronDown,
   LogOut
 } from "lucide-react";
-import { useApp } from "@/context/app-context";
+import { useApp, type CurrentUser } from "@/context/app-context";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -43,13 +46,15 @@ const projectNav = [
   { href: "capex", label: "CAPEX Estimate", icon: DollarSign },
   { href: "bom", label: "BOM / BOQ", icon: Package },
   { href: "sld", label: "SLD Preview", icon: Network },
+  { href: "scada", label: "SCADA Data", icon: Database },
+  { href: "history", label: "Design History", icon: History },
   { href: "reports", label: "Reports", icon: FileText }
 ];
 
-export function Sidebar({ user }: { user: { name: string; email: string } }) {
+export function Sidebar({ user }: { user: CurrentUser }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { activeProject, projects, setActive } = useApp();
+  const { activeProject, projects, setActive, can } = useApp();
   const [showProjectSelect, setShowProjectSelect] = useState(false);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
@@ -151,15 +156,28 @@ export function Sidebar({ user }: { user: { name: string; email: string } }) {
         )}
 
         <p className="mb-2 mt-6 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">System</p>
-        <Link
-          href="/admin/settings"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
-            isActive("/admin/settings") ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"
-          }`}
-        >
-          <Settings className="h-4 w-4" />
-          Admin Settings
-        </Link>
+        {can("admin:manage") && (
+          <Link
+            href="/admin/settings"
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
+              isActive("/admin/settings") ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"
+            }`}
+          >
+            <Settings className="h-4 w-4" />
+            Admin Settings
+          </Link>
+        )}
+        {can("roles:manage") && (
+          <Link
+            href="/admin/users"
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
+              isActive("/admin/users") ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            User Management
+          </Link>
+        )}
       </nav>
 
       <div className="border-t border-slate-700 px-4 py-3">
@@ -171,6 +189,11 @@ export function Sidebar({ user }: { user: { name: string; email: string } }) {
             <p className="truncate text-sm font-medium text-white">{user.name}</p>
             <p className="truncate text-[11px] text-slate-400">{user.email}</p>
           </div>
+        </div>
+        <div className="mb-2 px-1">
+          <span className="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400">
+            {user.role}
+          </span>
         </div>
         <button
           onClick={handleSignOut}

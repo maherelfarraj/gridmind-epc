@@ -1,18 +1,25 @@
 "use server";
 
 import { and, desc, eq } from "drizzle-orm";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { adminSettings, project } from "@/lib/db/schema";
 import type { AdminSettings, Project } from "@/lib/types";
+import { requireUser } from "@/lib/session";
+import { can, type Permission } from "@/lib/permissions";
 
 type ProjectData = Omit<Project, "id" | "createdAt" | "updatedAt">;
 
 async function getUserId(): Promise<string> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error("Unauthorized");
-  return session.user.id;
+  const user = await requireUser();
+  return user.id;
+}
+
+async function requirePermission(permission: Permission): Promise<string> {
+  const user = await requireUser();
+  if (!can(user.role, permission)) {
+    throw new Error(`Forbidden: your role (${user.role}) cannot perform this action.`);
+  }
+  return user.id;
 }
 
 function rowToProject(row: typeof project.$inferSelect): Project {
@@ -36,7 +43,7 @@ export async function listProjects(): Promise<Project[]> {
 }
 
 export async function createProjectAction(data: ProjectData): Promise<Project> {
-  const userId = await getUserId();
+  const userId = await requirePermission("project:create");
   const id = `proj-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
   const [row] = await db
     .insert(project)
@@ -53,7 +60,7 @@ export async function createProjectAction(data: ProjectData): Promise<Project> {
 }
 
 export async function saveProjectAction(full: Project): Promise<Project> {
-  const userId = await getUserId();
+  const userId = await requirePermission("project:edit");
   const { id, createdAt, updatedAt, ...data } = full;
   const [row] = await db
     .update(project)
@@ -71,7 +78,7 @@ export async function saveProjectAction(full: Project): Promise<Project> {
 }
 
 export async function deleteProjectAction(id: string): Promise<void> {
-  const userId = await getUserId();
+  const userId = await requirePermission("project:delete");
   await db.delete(project).where(and(eq(project.id, id), eq(project.userId, userId)));
 }
 
@@ -85,7 +92,7 @@ export async function getAdminSettingsAction(): Promise<AdminSettings | null> {
 }
 
 export async function saveAdminSettingsAction(settings: AdminSettings): Promise<void> {
-  const userId = await getUserId();
+  const userId = await requirePermission("admin:manage");
   await db
     .insert(adminSettings)
     .values({ userId, data: settings })

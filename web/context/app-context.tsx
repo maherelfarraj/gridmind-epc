@@ -13,12 +13,23 @@ import {
   saveProjectAction,
 } from "@/app/actions/projects";
 import type { NewProjectData } from "@/lib/project-factory";
+import { can as canPermission, type Permission } from "@/lib/permissions";
+import type { UserRole } from "@/lib/types";
+
+export type CurrentUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+};
 
 interface AppContextValue {
   projects: Project[];
   activeProject: Project | null;
   admin: AdminSettings;
   loading: boolean;
+  currentUser: CurrentUser;
+  can: (permission: Permission) => boolean;
   refresh: () => Promise<void>;
   setActive: (id: string | null) => void;
   createProject: (data: NewProjectData) => Promise<Project>;
@@ -29,7 +40,13 @@ interface AppContextValue {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-export function AppProvider({ children }: { children: ReactNode }) {
+export function AppProvider({
+  children,
+  currentUser,
+}: {
+  children: ReactNode;
+  currentUser: CurrentUser;
+}) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectIdState] = useState<string | null>(null);
   const [admin, setAdmin] = useState<AdminSettings>(DEFAULT_ADMIN_SETTINGS);
@@ -92,6 +109,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeProject,
         admin,
         loading,
+        currentUser,
+        can: (permission: Permission) => canPermission(currentUser.role, permission),
         refresh,
         setActive,
         createProject,

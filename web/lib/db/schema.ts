@@ -4,6 +4,7 @@ import {
   timestamp,
   boolean,
   jsonb,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
@@ -15,6 +16,7 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("emailVerified").notNull().default(false),
   image: text("image"),
+  role: text("role").notNull().default("Engineer"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
@@ -77,4 +79,28 @@ export const adminSettings = pgTable("admin_settings", {
   userId: text("userId").primaryKey(),
   data: jsonb("data").notNull(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export const scadaLog = pgTable("scada_log", {
+  id: text("id").primaryKey(),
+  userId: text("userId").notNull(),
+  projectId: text("projectId").notNull(),
+  timestamp: timestamp("timestamp").notNull(),
+  acPowerKw: doublePrecision("acPowerKw"),
+  dcPowerKw: doublePrecision("dcPowerKw"),
+  poaIrradiance: doublePrecision("poaIrradiance"),
+  moduleTempC: doublePrecision("moduleTempC"),
+  ambientTempC: doublePrecision("ambientTempC"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export const designHistory = pgTable("design_history", {
+  id: text("id").primaryKey(),
+  userId: text("userId").notNull(),
+  projectId: text("projectId").notNull(),
+  label: text("label").notNull(),
+  authorName: text("authorName"),
+  summary: jsonb("summary").notNull(),
+  snapshot: jsonb("snapshot").notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
 });

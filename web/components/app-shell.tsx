@@ -1,5 +1,5 @@
 import { Sidebar } from "./sidebar";
-import { AppProvider } from "@/context/app-context";
+import { AppProvider, type CurrentUser } from "@/context/app-context";
 import { ToastProvider } from "./toast-provider";
 
 export function AppShell({
@@ -7,10 +7,10 @@ export function AppShell({
   user,
 }: {
   children: React.ReactNode;
-  user: { name: string; email: string };
+  user: CurrentUser;
 }) {
   return (
-    <AppProvider>
+    <AppProvider currentUser={user}>
       <ToastProvider>
         <div className="min-h-screen bg-slate-50">
           <Sidebar user={user} />
