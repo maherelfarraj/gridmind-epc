@@ -3,6 +3,28 @@ import { pool } from "@/lib/db";
 
 export const auth = betterAuth({
   database: pool,
+  databaseHooks: {
+    user: {
+      create: {
+        // Bootstrap ownership: the very first registered user becomes Admin so
+        // a fresh deployment always has someone who can manage roles/settings.
+        // Everyone after that defaults to Engineer.
+        before: async (userData) => {
+          let role = "Engineer";
+          try {
+            const existing = await pool.query('SELECT 1 FROM "user" LIMIT 1');
+            if (existing.rowCount === 0) role = "Admin";
+          } catch (err) {
+            console.log(
+              "[v0] first-user bootstrap check failed, defaulting role:",
+              err instanceof Error ? err.message : String(err),
+            );
+          }
+          return { data: { ...userData, role } };
+        },
+      },
+    },
+  },
   baseURL:
     process.env.BETTER_AUTH_URL ??
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
